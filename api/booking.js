@@ -207,6 +207,156 @@ module.exports = async function handler(req, res) {
     `Galiyat, Northern Pakistan\n` +
     `${to}  ·  ${WHATSAPP}\n`;
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     THE HTML VERSIONS
+
+     Email is not the web. The rules below are not stylistic preferences,
+     they are what the clients actually support:
+
+       · Layout is nested TABLES. Flexbox and grid do not exist in Outlook,
+         which renders mail through Microsoft Word.
+       · Every style is INLINE. Gmail strips most of what is in <head>.
+       · No web fonts. Gmail will not load Cormorant Garamond, so the
+         display face is Georgia — the closest serif that is already on
+         essentially every device.
+       · Images are blocked by default in most clients, so the masthead has
+         to read correctly with the logo missing. The alt text is styled to
+         carry it on its own.
+       · Cream paper with a forest band, rather than the site's dark ground.
+         A dark email is a gamble: several clients force-invert dark mail and
+         the result is unreadable. This is the same treatment as the PDFs.
+       · border-radius is ignored by Outlook. Corners will be square there.
+         That is fine; it is not worth VML to round them.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  const SITE = process.env.SITE_URL || 'https://woodlandcottage.pk';
+
+  const C = {
+    ink: '#07120C', ink2: '#0F2117',
+    paper: '#F1ECE1', card: '#FBF8F2',
+    text: '#2A3830', soft: '#6E7A6E',
+    sage: '#6E8469', moss: '#A9C68B', mossInk: '#0E1A0A',
+    rule: '#DED6C6',
+    beige: '#EFE9DC', beigeDim: '#9AA294',
+  };
+  const SERIF = "Georgia,'Times New Roman',Times,serif";
+  const SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+
+  const esc = (v) =>
+    String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  /** A row of the stay table. `strong` is used for the total. */
+  const row = (label, value, strong) => `
+    <tr>
+      <td style="padding:11px 0;border-bottom:1px solid ${C.rule};font-family:${SANS};font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:${C.sage};vertical-align:top;white-space:nowrap;">${esc(label)}</td>
+      <td style="padding:11px 0;border-bottom:1px solid ${C.rule};font-family:${SERIF};font-size:${strong ? '20px' : '16px'};line-height:1.4;color:${strong ? C.ink : C.text};text-align:right;">${value}</td>
+    </tr>`;
+
+  const button = (href, label, solid) => `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;">
+      <tr><td align="center" bgcolor="${solid ? C.moss : C.card}" style="border-radius:999px;border:1px solid ${solid ? C.moss : C.rule};">
+        <a href="${href}" style="display:inline-block;padding:13px 26px;font-family:${SANS};font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:${solid ? C.mossInk : C.text};text-decoration:none;">${esc(label)}</a>
+      </td></tr>
+    </table>`;
+
+  /** Masthead, body, signoff. `preheader` is the grey line of text the
+      inbox shows next to the subject — if it is not set, clients help
+      themselves to whatever text comes first, which looks careless. */
+  const shell = (preheader, eyebrow, heading, bodyHtml) => `<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>${esc(heading)}</title>
+</head>
+<body style="margin:0;padding:0;background-color:${C.paper};-webkit-text-size-adjust:100%;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;font-size:1px;line-height:1px;">${esc(preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.paper}" style="background-color:${C.paper};">
+  <tr><td align="center" style="padding:28px 14px 40px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;">
+
+      <tr><td bgcolor="${C.ink}" align="center" style="background-color:${C.ink};padding:34px 28px 30px;border-radius:14px 14px 0 0;">
+        <img src="${SITE}/media/logo-word.png" width="150" alt="Woodland Cottages"
+             style="display:block;width:150px;max-width:62%;height:auto;border:0;font-family:${SERIF};font-size:21px;color:${C.beige};">
+        <div style="font-family:${SANS};font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:${C.beigeDim};padding-top:13px;">Galiyat &middot; Northern Pakistan</div>
+      </td></tr>
+
+      <tr><td bgcolor="${C.card}" style="background-color:${C.card};padding:36px 32px 30px;">
+        <div style="font-family:${SANS};font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:${C.sage};">${esc(eyebrow)}</div>
+        <h1 style="margin:14px 0 0;font-family:${SERIF};font-size:29px;line-height:1.18;font-weight:normal;color:${C.ink};">${esc(heading)}</h1>
+        ${bodyHtml}
+      </td></tr>
+
+      <tr><td bgcolor="${C.ink}" style="background-color:${C.ink};padding:24px 32px 26px;border-radius:0 0 14px 14px;">
+        <div style="font-family:${SERIF};font-size:15px;color:${C.beige};">Woodland Cottages</div>
+        <div style="font-family:${SANS};font-size:11px;line-height:1.9;color:${C.beigeDim};padding-top:5px;">
+          <a href="mailto:${esc(to)}" style="color:${C.beigeDim};text-decoration:none;">${esc(to)}</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://wa.me/${WHATSAPP.replace(/\D/g, '').replace(/^0/, '92')}" style="color:${C.beigeDim};text-decoration:none;">${WHATSAPP}</a><br>
+          <a href="${SITE}" style="color:${C.beigeDim};text-decoration:none;">woodlandcottage.pk</a>
+        </div>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+
+  const stayTable = `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:26px 0 0;border-top:1px solid ${C.rule};">
+      ${row('Cottage', esc(cottage))}
+      ${row('Arriving', esc(prettyDate(checkin)))}
+      ${row('Leaving', esc(prettyDate(checkout)))}
+      ${row('Nights', String(nights))}
+      ${row('Guests', esc(guests || 'not stated'))}
+      ${row('Estimate', `PKR ${money(total)}${units === 2 ? `<span style="font-family:${SANS};font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:${C.soft};display:block;padding-top:4px;">both cottages</span>` : ''}`, true)}
+    </table>`;
+
+  const para = (t) => `<p style="margin:20px 0 0;font-family:${SERIF};font-size:16px;line-height:1.62;color:${C.text};">${t}</p>`;
+
+  const guestHtml = shell(
+    `Your dates are with us — we will confirm within the day.`,
+    'Request received',
+    'We have your request.',
+    `${para(`Dear ${esc(first)}, thank you for writing to us. Your request has reached Woodland Cottages and we have it in front of us.`)}
+     ${stayTable}
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;">
+       <tr><td bgcolor="#EDF1E6" style="background-color:#EDF1E6;border-left:3px solid ${C.moss};padding:16px 18px;">
+         <p style="margin:0;font-family:${SERIF};font-size:15px;line-height:1.6;color:${C.text};"><strong style="font-weight:normal;color:${C.ink};">Nothing is booked and nothing is charged yet.</strong> We will come back to you within the day to confirm the cottage is free and send you the final number — seasonal rates and longer stays we quote by hand rather than by calculator.</p>
+       </td></tr>
+     </table>
+     ${para(`When you come, check-in is ${CHECKIN_WINDOW} and check-out is by ${CHECKOUT_BY}.`)}
+     ${para(`If you would rather talk it through first, we are on WhatsApp.`)}
+     <div style="padding-top:22px;">${button(`https://wa.me/${WHATSAPP.replace(/\D/g, '').replace(/^0/, '92')}`, 'Message us on WhatsApp', true)}</div>`
+  );
+
+  const ownerHtml = shell(
+    `${cottage} · ${prettyDate(checkin)} · ${nights} nights · PKR ${money(total)}`,
+    'New booking request',
+    `${esc(name)} wants ${esc(cottage)}.`,
+    `${stayTable}
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:24px 0 0;">
+       ${row('Name', esc(name))}
+       ${row('WhatsApp', `<a href="https://wa.me/${esc(waIntl)}" style="color:${C.ink};text-decoration:none;border-bottom:1px solid ${C.moss};">${esc(phone)}</a>`)}
+       ${row('Email', `<a href="mailto:${esc(email)}" style="color:${C.ink};text-decoration:none;border-bottom:1px solid ${C.moss};">${esc(email)}</a>`)}
+     </table>
+     ${message ? `
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 0;">
+       <tr><td bgcolor="#EDF1E6" style="background-color:#EDF1E6;border-left:3px solid ${C.moss};padding:16px 18px;">
+         <div style="font-family:${SANS};font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:${C.sage};padding-bottom:8px;">What they said</div>
+         <p style="margin:0;font-family:${SERIF};font-size:15px;line-height:1.6;color:${C.text};white-space:pre-wrap;">${esc(message)}</p>
+       </td></tr>
+     </table>` : ''}
+     <div style="padding-top:26px;">
+       ${button(`https://wa.me/${esc(waIntl)}`, 'Reply on WhatsApp', true)}
+       ${button(`mailto:${esc(email)}`, 'Reply by email', false)}
+     </div>
+     <p style="margin:18px 0 0;font-family:${SANS};font-size:11px;line-height:1.7;color:${C.soft};">Hitting reply on this email also goes straight to ${esc(name)} — the reply-to is set to their address.</p>`
+  );
+
   /* The owner copy is the one that must not fail. Send it first and on its
      own: if the guest copy is rejected — which it will be until the domain is
      verified in Resend — the request has still arrived and can still be
@@ -219,6 +369,7 @@ module.exports = async function handler(req, res) {
       reply_to: [email],
       subject: `Booking request — ${cottage} — ${prettyDate(checkin)} — ${name}`,
       text: ownerText,
+      html: ownerHtml,
     });
   } catch (err) {
     console.error('[booking] owner mail failed:', err.message);
@@ -236,6 +387,7 @@ module.exports = async function handler(req, res) {
       reply_to: [to],
       subject: 'We have your request — Woodland Cottages',
       text: guestText,
+      html: guestHtml,
     });
   } catch (err) {
     guestMailed = false;
