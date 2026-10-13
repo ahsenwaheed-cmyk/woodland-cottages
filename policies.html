@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07120C">
+<title>Policies — Woodland Cottages</title>
+<meta name="description" content="Cancellation, booking changes and refunds for stays at Woodland Cottages, Galiyat.">
+<link rel="icon" href="media/logo-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#07120C;
+  --ink-2:#0B1A12;
+  --ink-3:#102418;
+  --beige:#EFE9DC;
+  --beige-2:#D8D1C1;
+  --beige-dim:#9AA294;
+  --sage:#8FA68A;
+  --sage-2:#6E8469;
+  --lime:#A9C68B;          /* muted moss — accent */
+  --lime-ink:#0E1A0A;
+  --line:rgba(239,233,220,.14);
+  --serif:'Cormorant Garamond', 'Didot', 'Bodoni MT', Georgia, serif;
+  --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+
+  /* One radius for the whole site. Every card, panel, photo and frame uses it,
+     so nothing anywhere ends in a square corner. --r-sm is the same shape read
+     at small sizes (tags, chips, skeletons) where 30px would swallow the box. */
+  --r:30px;
+  --r-sm:18px;
+
+  /* ---- glass ----------------------------------------------------------
+     One set of tokens so every frosted surface on the site is the same
+     material. --glass-bg is deliberately low-alpha: the blur does the
+     work, the tint only warms it. The inset highlight along the top edge
+     is what reads as "glass" rather than "grey box". */
+  --glass-bg:rgba(239,233,220,.055);
+  --glass-bg-2:rgba(239,233,220,.085);
+  --glass-brd:rgba(239,233,220,.16);
+  --glass-brd-2:rgba(239,233,220,.30);
+  --glass-blur:blur(18px) saturate(1.35);
+  --glass-shadow:inset 0 1px 0 rgba(255,255,255,.10), 0 22px 60px rgba(0,0,0,.34);
+  --glass-shadow-2:inset 0 1px 0 rgba(255,255,255,.16), 0 30px 80px rgba(0,0,0,.46);
+  /* Panels that sit ON TOP OF A PHOTOGRAPH need a dark tint, not a light one.
+     A pale frost over a bright frame leaves body copy unreadable — this keeps
+     the same frosted material but guarantees the contrast underneath it. */
+  --glass-dark:rgba(7,18,12,.44);
+  --glass-dark-2:rgba(7,18,12,.58);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{
+  background:var(--ink);color:var(--beige);
+  font-family:var(--serif);font-weight:300;
+  font-size:18px;line-height:1.65;overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+[hidden]{display:none !important}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--lime);color:var(--lime-ink)}
+
+/* ---------- type ---------- */
+.eyebrow{
+  font-family:var(--sans);font-weight:300;font-size:10.5px;
+  letter-spacing:.34em;text-transform:uppercase;color:var(--sage);
+}
+h1,h2,h3{font-weight:300;line-height:1.04;letter-spacing:-.015em}
+h1{font-size:clamp(2.9rem,9.5vw,9.5rem)}
+h2{font-size:clamp(2.3rem,5.2vw,4.6rem)}
+h3{font-size:clamp(1.5rem,2.4vw,2.2rem)}
+.lede{font-size:clamp(1.15rem,1.55vw,1.5rem);color:var(--beige-2);font-weight:300;line-height:1.7}
+.muted{color:var(--beige-dim)}
+em{font-style:italic;color:var(--sage)}
+
+.wrap{width:min(1280px,90vw);margin-inline:auto}
+.narrow{width:min(760px,88vw);margin-inline:auto}
+section{position:relative}
+section[id]{scroll-margin-top:104px}
+@media(max-width:860px){section[id]{scroll-margin-top:80px}}
+.pad{padding:clamp(6rem,13vh,11rem) 0}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(28px);transition:opacity 1.1s var(--ease),transform 1.1s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv-d1{transition-delay:.09s}.rv-d2{transition-delay:.18s}.rv-d3{transition-delay:.27s}
+.rv-d4{transition-delay:.36s}.rv-d5{transition-delay:.45s}.rv-d6{transition-delay:.54s}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
+/* ---------- glass utility ---------- */
+.glass{
+  border-radius:var(--r);
+  background:var(--glass-bg);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-brd);
+  box-shadow:var(--glass-shadow);
+}
+/* Safari/Firefox without backdrop-filter get an opaque panel instead of a
+   washed-out transparent one — the layout must not depend on the blur. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass{background:rgba(11,26,18,.92)}
+}
+
+/* ---------- nav ---------- */
+.topnav{
+  position:fixed;inset:0 0 auto 0;z-index:80;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.35rem clamp(1.2rem,5vw,3rem);
+  transition:padding .6s var(--ease),background .6s var(--ease),
+             border-color .6s var(--ease),box-shadow .6s var(--ease);
+  border-bottom:1px solid transparent;
+}
+.topnav::before{                       /* scrim so links stay legible over any frame */
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(to bottom, rgba(4,9,6,.72) 0%, rgba(4,9,6,.34) 55%, transparent 100%);
+  transition:opacity .6s var(--ease);
+}
+/* once the page has moved, the bar becomes frosted glass instead of a scrim */
+.topnav.stuck{
+  padding-block:.85rem;
+  background:rgba(7,18,12,.55);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border-bottom-color:var(--glass-brd);
+  box-shadow:0 18px 50px rgba(0,0,0,.34);
+}
+.topnav.stuck::before{opacity:0}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .topnav.stuck{background:rgba(7,18,12,.94)}
+}
+.brand{display:flex;align-items:center;gap:.85rem;line-height:0}
+.brand-tree{height:30px;width:auto;filter:drop-shadow(0 1px 10px rgba(4,9,6,.7));transition:transform .7s var(--ease)}
+.brand-word{height:44px;width:auto;filter:drop-shadow(0 1px 10px rgba(4,9,6,.7));transition:height .6s var(--ease)}
+.brand:hover .brand-tree{transform:translateY(-2px) rotate(-2deg)}
+.topnav.stuck .brand-tree{height:26px}
+.topnav.stuck .brand-word{height:38px}
+@media(max-width:860px){
+  .brand-tree{height:23px}.brand-word{height:33px}
+  .topnav.stuck .brand-tree{height:21px}.topnav.stuck .brand-word{height:30px}
+}
+.navlinks{display:flex;gap:2.1rem;align-items:center}
+.navlinks a{
+  font-family:var(--sans);font-weight:400;font-size:11px;letter-spacing:.24em;
+  text-transform:uppercase;color:#fff;text-shadow:0 1px 10px rgba(4,9,6,.75);
+  position:relative;padding-bottom:.3rem;transition:color .4s var(--ease);
+}
+.navlinks a::after{
+  content:"";position:absolute;left:0;bottom:0;width:0;height:1px;
+  background:var(--lime);transition:width .5s var(--ease);
+}
+.navlinks a:hover,.navlinks a.here{color:var(--lime)}
+.navlinks a:hover::after{width:100%}
+.navlinks a.here::after{width:100%;background:var(--sage-2)}
+
+/* ---------- mobile menu ----------
+   The site is multi-page now, so phones need a real way to reach The Walk,
+   the house rules and the policies — not just the four homepage anchors. */
+.menubtn{
+  display:none;width:44px;height:44px;border:0;background:transparent;cursor:pointer;
+  position:relative;margin-right:-8px;
+}
+.menubtn i{
+  position:absolute;left:11px;width:22px;height:1px;background:#fff;
+  box-shadow:0 1px 8px rgba(4,9,6,.8);
+  transition:transform .5s var(--ease),opacity .3s var(--ease),width .5s var(--ease);
+}
+.menubtn i:nth-child(1){top:18px}
+.menubtn i:nth-child(2){top:25px;width:15px}
+body.menu-open .menubtn i:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
+body.menu-open .menubtn i:nth-child(2){transform:translateY(-3.5px) rotate(-45deg);width:22px}
+.drawer{
+  position:fixed;inset:0;z-index:78;display:flex;flex-direction:column;
+  justify-content:center;gap:.4rem;padding:5.5rem clamp(1.4rem,7vw,3rem) 2rem;
+  background:rgba(7,18,12,.72);
+  -webkit-backdrop-filter:blur(26px) saturate(1.3);backdrop-filter:blur(26px) saturate(1.3);
+  opacity:0;visibility:hidden;transition:opacity .55s var(--ease),visibility .55s;
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .drawer{background:rgba(7,18,12,.97)}
+}
+body.menu-open .drawer{opacity:1;visibility:visible}
+.drawer a{
+  font-size:clamp(2rem,9vw,2.9rem);line-height:1.25;color:var(--beige);
+  padding:.28rem 0;opacity:0;transform:translateY(18px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease),color .35s;
+}
+body.menu-open .drawer a{opacity:1;transform:none}
+.drawer a:nth-child(1){transition-delay:.06s}.drawer a:nth-child(2){transition-delay:.11s}
+.drawer a:nth-child(3){transition-delay:.16s}.drawer a:nth-child(4){transition-delay:.21s}
+.drawer a:nth-child(5){transition-delay:.26s}.drawer a:nth-child(6){transition-delay:.31s}
+.drawer a:nth-child(7){transition-delay:.36s}
+.drawer a:active,.drawer a:hover{color:var(--lime)}
+.drawer .dr-foot{
+  margin-top:2.4rem;font-family:var(--sans);font-size:10px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--beige-dim);font-size:10px;
+}
+@media(max-width:860px){
+  .navlinks{display:none}
+  .menubtn{display:block}
+}
+body.menu-open{overflow:hidden}
+
+/* ---------- buttons ----------
+   Three things happen on hover, all cheap: a wash sweeps in from the left,
+   the button lifts a hair, and the letter-spacing opens up. Nothing spins. */
+.btn{
+  font-family:var(--sans);font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:300;
+  padding:1.05rem 2.3rem;border:1px solid var(--glass-brd);border-radius:999px;
+  color:var(--beige);cursor:pointer;display:inline-block;position:relative;overflow:hidden;
+  background:var(--glass-bg);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:var(--glass-shadow);
+  transition:color .45s var(--ease),border-color .55s var(--ease),
+             transform .45s var(--ease),box-shadow .55s var(--ease),
+             letter-spacing .55s var(--ease);
+  will-change:transform;
+}
+.btn > span{position:relative;z-index:2}
+.btn::before{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:var(--beige);
+  transform:translateX(-101%);
+  transition:transform .62s var(--ease);
+}
+.btn:hover,.btn:focus-visible{
+  color:var(--ink);border-color:var(--beige);
+  transform:translateY(-2px);letter-spacing:.27em;
+  box-shadow:var(--glass-shadow-2);
+}
+.btn:hover::before,.btn:focus-visible::before{transform:translateX(0)}
+.btn:active{transform:translateY(0);transition-duration:.12s}
+.btn:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+
+.btn-lime{background:var(--lime);color:var(--lime-ink);border-color:var(--lime);box-shadow:0 14px 40px rgba(20,40,16,.4)}
+.btn-lime::before{background:var(--lime-ink)}
+.btn-lime:hover,.btn-lime:focus-visible{color:var(--lime);border-color:var(--lime);box-shadow:0 20px 54px rgba(20,40,16,.5)}
+
+/* ghost variant for use on the cream booking card */
+.btn-ink{background:transparent;color:var(--ink);border-color:rgba(7,18,12,.22);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.btn-ink::before{background:var(--ink)}
+.btn-ink:hover,.btn-ink:focus-visible{color:var(--beige);border-color:var(--ink)}
+
+/* arrow that slides on hover — for text links that lead somewhere */
+.alink{
+  display:inline-flex;align-items:center;gap:.7rem;
+  font-family:var(--sans);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--beige);border-bottom:1px solid var(--sage-2);padding-bottom:.42rem;
+  transition:color .45s var(--ease),border-color .45s var(--ease),letter-spacing .5s var(--ease);
+}
+.alink svg{width:16px;height:9px;overflow:visible;transition:transform .5s var(--ease)}
+.alink svg path{stroke:currentColor;stroke-width:1;fill:none}
+.alink:hover,.alink:focus-visible{color:var(--lime);border-color:var(--lime);letter-spacing:.3em}
+.alink:hover svg,.alink:focus-visible svg{transform:translateX(5px)}
+
+@media (prefers-reduced-motion:reduce){
+  .btn,.btn::before,.alink,.alink svg{transition-duration:.01ms !important}
+  .btn:hover{transform:none;letter-spacing:.24em}
+}
+
+/* ---------- page hero (sub-pages) ---------- */
+.phero{
+  position:relative;min-height:clamp(380px,56vh,620px);display:grid;align-items:end;
+  overflow:hidden;padding:clamp(5rem,10vh,8rem) 0 clamp(2.6rem,5vh,4rem);
+  border-radius:0 0 var(--r) var(--r);
+}
+.phero-media{position:absolute;inset:0}
+.phero-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(1.03)}
+.phero::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to bottom, rgba(7,18,12,.80) 0%, rgba(7,18,12,.34) 38%, rgba(7,18,12,.88) 100%);
+}
+.phero .wrap{position:relative;z-index:3}
+.phero h1{font-size:clamp(2.6rem,7vw,6rem);margin-top:1.4rem}
+.phero .lede{margin-top:1.5rem;max-width:56ch}
+
+/* ---------- grain ---------- */
+.grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.055;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:clamp(3rem,6vw,5rem) 0 2.5rem;position:relative;overflow:hidden}
+footer::before{
+  content:"";position:absolute;inset:auto 0 0 0;height:1px;
+  background:linear-gradient(to right,transparent,rgba(169,198,139,.35),transparent);
+}
+.f-top{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap;padding-bottom:3rem}
+.f-mark{display:flex;align-items:center;gap:clamp(.9rem,1.6vw,1.5rem);line-height:0}
+.f-tree{height:clamp(58px,7vw,86px);width:auto;transition:transform .8s var(--ease)}
+.f-word{height:clamp(46px,5.6vw,68px);width:auto}
+.f-mark:hover .f-tree{transform:translateY(-4px)}
+.f-nav{display:flex;flex-direction:column;gap:1.5rem;align-items:flex-end}
+@media(max-width:860px){.f-nav{align-items:flex-start}}
+.f-links{display:flex;gap:1.8rem;flex-wrap:wrap}
+.f-links a{
+  font-family:var(--sans);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--beige-dim);position:relative;padding-bottom:.28rem;transition:color .4s var(--ease);
+}
+.f-links a::after{
+  content:"";position:absolute;left:0;bottom:0;width:0;height:1px;
+  background:var(--lime);transition:width .5s var(--ease);
+}
+.f-links a:hover{color:var(--lime)}
+.f-links a:hover::after{width:100%}
+.f-links.f-sub a{font-size:9.5px;letter-spacing:.2em;color:rgba(154,162,148,.72)}
+.f-bot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-top:1.8rem;border-top:1px solid var(--line);
+  font-family:var(--sans);font-size:10px;letter-spacing:.16em;color:rgba(154,162,148,.7)}
+
+/* ---------- WhatsApp FAB ---------- */
+.wa{
+  position:fixed;right:clamp(1rem,2.5vw,2rem);bottom:clamp(1rem,2.5vw,2rem);z-index:90;
+  display:flex;align-items:center;gap:.6rem;padding:.85rem 1.4rem;border-radius:999px;
+  background:rgba(169,198,139,.88);color:var(--lime-ink);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+  border:1px solid rgba(239,233,220,.30);
+  font-family:var(--sans);font-size:10.5px;
+  letter-spacing:.2em;text-transform:uppercase;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28), 0 12px 40px rgba(0,0,0,.45);
+  transition:transform .5s var(--ease),box-shadow .5s var(--ease),background .5s var(--ease);
+}
+.wa svg{width:15px;height:15px;fill:currentColor;flex:0 0 auto}
+body.menu-open .wa{opacity:0;pointer-events:none}
+.wa:hover{transform:translateY(-3px);background:var(--lime);box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 20px 52px rgba(0,0,0,.5)}
+@media(max-width:860px){
+  .wa{padding:.7rem 1.05rem;font-size:9.5px;letter-spacing:.16em;right:.85rem;bottom:.85rem}
+  footer{padding-bottom:5.5rem}       /* keep the FAB off the footer text */
+}
+@media (prefers-reduced-motion:reduce){.wa:hover{transform:none}}
+
+/* ---------- long-form document pages (house rules, policies) ---------- */
+.doc{display:grid;grid-template-columns:260px 1fr;gap:clamp(2.5rem,6vw,6rem);align-items:start}
+@media(max-width:960px){.doc{grid-template-columns:1fr;gap:2.5rem}}
+
+.doc-toc{
+  position:sticky;top:118px;border-radius:var(--r);
+  padding:clamp(1.4rem,2.2vw,1.9rem);
+  background:var(--glass-bg);border:1px solid var(--glass-brd);box-shadow:var(--glass-shadow);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .doc-toc,.doc-block,.doc-note{background:rgba(11,26,18,.92)}
+}
+@media(max-width:960px){.doc-toc{position:static}}
+.doc-toc .eyebrow{display:block;margin-bottom:1.2rem}
+.doc-toc a{
+  display:block;padding:.52rem 0;font-family:var(--sans);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--beige-dim);
+  border-left:1px solid transparent;padding-left:0;
+  transition:color .4s var(--ease),padding-left .4s var(--ease),border-color .4s var(--ease);
+}
+.doc-toc a:hover,.doc-toc a.here{color:var(--lime);padding-left:.7rem;border-left-color:var(--lime)}
+
+.doc-body h2{font-size:clamp(1.85rem,3.3vw,2.7rem);margin-bottom:1.3rem}
+.doc-body h3{font-size:clamp(1.25rem,1.9vw,1.6rem);margin:2.2rem 0 .8rem;color:var(--beige)}
+.doc-body p{color:var(--beige-2);margin-bottom:1.1rem;line-height:1.72}
+.doc-body p.lead{font-size:1.2rem;color:var(--beige-2)}
+.doc-body strong{font-weight:400;color:var(--beige)}
+.doc-block{
+  padding:clamp(1.7rem,3vw,2.6rem);margin-bottom:clamp(1.1rem,2vw,1.6rem);border-radius:var(--r);
+  background:var(--glass-bg);border:1px solid var(--glass-brd);box-shadow:var(--glass-shadow);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  transition:border-color .6s var(--ease),background .6s var(--ease);
+}
+.doc-block:hover{border-color:var(--glass-brd-2);background:var(--glass-bg-2)}
+.doc-block > .eyebrow{display:block;margin-bottom:1rem}
+
+.rules{list-style:none;counter-reset:r}
+.rules li{
+  counter-increment:r;position:relative;
+  padding:1.15rem 0 1.15rem 3.1rem;border-bottom:1px solid var(--glass-brd);
+  color:var(--beige-2);line-height:1.66;
+  transition:padding-left .5s var(--ease)}
+.rules li:last-child{border-bottom:0;padding-bottom:0}
+.rules li::before{
+  content:counter(r,decimal-leading-zero);position:absolute;left:0;top:1.35rem;
+  font-family:var(--sans);font-size:10px;letter-spacing:.18em;color:var(--sage-2);
+  transition:color .5s var(--ease);
+}
+.rules li:hover{padding-left:3.5rem}
+.rules li:hover::before{color:var(--lime)}
+.rules li b{display:block;color:var(--beige);font-weight:400;font-size:1.1rem;margin-bottom:.28rem}
+
+.kv{display:grid;grid-template-columns:auto 1fr;gap:.2rem 2rem;margin-top:.4rem}
+@media(max-width:560px){.kv{grid-template-columns:1fr;gap:.1rem}}
+.kv dt{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);padding:.75rem 0;white-space:nowrap}
+.kv dd{padding:.7rem 0;color:var(--beige-2)}
+@media(max-width:560px){.kv dt{padding-bottom:.1rem}.kv dd{padding-top:0;padding-bottom:1rem}}
+
+.tbl-scroll{border:1px solid var(--glass-brd);border-radius:var(--r);overflow-x:auto}
+.tiers{width:100%;border-collapse:collapse;margin-top:0}
+.tiers th,.tiers td{text-align:left;padding:1rem 1.1rem;border-bottom:1px solid var(--glass-brd);vertical-align:top}
+.tiers th{
+  font-family:var(--sans);font-weight:400;font-size:9.5px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--sage);
+}
+.tiers td{color:var(--beige-2)}
+.tiers tr:last-child td{border-bottom:0}
+.tiers td b{color:var(--lime);font-weight:400}
+.tiers tbody tr{transition:background .45s var(--ease)}
+.tiers tbody tr:hover{background:rgba(239,233,220,.035)}
+
+.doc-note{
+  margin-top:clamp(2rem,4vw,3rem);padding:clamp(1.4rem,2.6vw,2.1rem);
+  border:1px solid rgba(169,198,139,.34);border-left-width:2px;border-radius:var(--r);
+  background:rgba(169,198,139,.05);
+}
+.doc-note .eyebrow{display:block;margin-bottom:.8rem;color:var(--lime)}
+.doc-note p{color:var(--beige-2);margin-bottom:0}
+
+.doc-cta{
+  margin-top:clamp(2.4rem,5vw,4rem);padding-top:clamp(2rem,4vw,3rem);
+  border-top:1px solid var(--line);display:flex;gap:1rem;flex-wrap:wrap;align-items:center;
+}
+@media(max-width:520px){.doc-cta{flex-direction:column;align-items:stretch}.doc-cta .btn{width:100%;text-align:center}}
+
+/* draft banner — removed once Ahsen signs the wording off */
+.draftbar{
+  position:relative;z-index:70;margin-top:0;
+  background:rgba(169,198,139,.12);border-bottom:1px solid rgba(169,198,139,.3);
+  padding:.85rem 1.2rem;text-align:center;
+  font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);
+}
+
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="index.html#top" class="brand" aria-label="Woodland Cottages — home">
+    <img class="brand-tree" src="media/logo-icon.png" alt="">
+    <img class="brand-word" src="media/logo-word.png" alt="Woodland Cottages">
+  </a>
+  <div class="navlinks">
+    <a href="the-walk.html">The Walk</a>
+    <a href="index.html#cottages">Cottages</a>
+    <a href="index.html#gallery">Gallery</a>
+    <a href="index.html#reviews">Reviews</a>
+    <a href="index.html#book">Book</a>
+  </div>
+  <button class="menubtn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="drawer"><i></i><i></i></button>
+</nav>
+
+<div class="drawer" id="drawer">
+  <a href="the-walk.html">The Walk</a>
+  <a href="index.html#cottages">The Cottages</a>
+  <a href="index.html#gallery">Gallery</a>
+  <a href="index.html#reviews">Reviews</a>
+  <a href="index.html#book">Book a stay</a>
+  <a href="house-rules.html">House Rules</a>
+  <a href="policies.html">Policies</a>
+  <div class="dr-foot">0346 9663367 · hello@woodlandcottage.pk</div>
+</div>
+
+
+<header class="phero">
+  <div class="phero-media"><img src="media/set-04.jpg" alt="The ridge and treeline above the cottages"></div>
+  <div class="grain"></div>
+  <div class="wrap">
+    <span class="eyebrow">The small print, plainly</span>
+    <h1>Policies</h1>
+    <p class="lede">What happens if your plans change — cancelling, moving your dates, and how money comes back to you. Written to be read once, not decoded later.</p>
+  </div>
+</header>
+
+<div class="draftbar">Draft for review &middot; wording not yet approved by the owners</div>
+
+<section class="pad">
+  <div class="wrap doc">
+    <nav class="doc-toc" aria-label="On this page">
+      <span class="eyebrow">On this page</span>
+      <a href="#cancellation">Cancellation policy</a>
+      <a href="#changes">Booking change policy</a>
+      <a href="#refunds">Refund policy</a>
+      <a href="#other">Other bookings</a>
+    </nav>
+
+    <div class="doc-body">
+      <p class="lead rv">These policies apply to bookings made directly with Woodland Cottages — through this website, by WhatsApp, or by phone. They sit alongside our <a class="inline-a" href="house-rules.html">house rules</a>. All times are Pakistan Standard Time, and "days before arrival" means whole days before your check-in date.</p>
+
+      <!-- ===== CANCELLATION ===== -->
+      <div class="doc-block rv" id="cancellation">
+        <span class="eyebrow">01</span>
+        <h2>Cancellation policy</h2>
+        <p>Cancel in writing — a WhatsApp message or an email to <a class="inline-a" href="mailto:hello@woodlandcottage.pk">hello@woodlandcottage.pk</a> is enough. The refund follows the date we receive it, not the date you decided.</p>
+
+        <h3>Standard dates</h3>
+        <div class="tbl-scroll">
+          <table class="tiers">
+            <thead><tr><th>You cancel</th><th>You get back</th></tr></thead>
+            <tbody>
+              <tr><td>14 or more days before arrival</td><td><b>100%</b> of what you paid, less the payment-processing fee</td></tr>
+              <tr><td>7 to 13 days before arrival</td><td><b>50%</b> of the total booking value</td></tr>
+              <tr><td>Fewer than 7 days, or no arrival</td><td><b>No refund</b> — though we will always try to re-let the nights, and refund you if we do</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Peak dates</h3>
+        <p>Peak dates are both Eid holidays, 20 December to 5 January, and weekends from June through August. They are flagged on the booking calendar when you choose your nights.</p>
+        <div class="tbl-scroll">
+          <table class="tiers">
+            <thead><tr><th>You cancel</th><th>You get back</th></tr></thead>
+            <tbody>
+              <tr><td>30 or more days before arrival</td><td><b>100%</b> of what you paid, less the payment-processing fee</td></tr>
+              <tr><td>14 to 29 days before arrival</td><td><b>50%</b> of the total booking value</td></tr>
+              <tr><td>Fewer than 14 days, or no arrival</td><td><b>No refund</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>If we have to cancel</h3>
+        <p>If we cancel your booking for any reason of ours — damage to the cottage, a burst pipe, anything at all — you get <strong>every rupee back</strong>, and we will help you find somewhere else in Galiyat for the same dates.</p>
+
+        <h3>Snow, landslides and closed roads</h3>
+        <p>If the road to the property is officially closed, or a government restriction makes the stay impossible, we will not keep your money for a stay you could not take. You may move the booking to any date within twelve months at no charge, or take a full refund. Bad weather that merely makes the drive unpleasant is not the same thing as a closed road, and is treated as an ordinary cancellation.</p>
+      </div>
+
+      <!-- ===== CHANGES ===== -->
+      <div class="doc-block rv" id="changes">
+        <span class="eyebrow">02</span>
+        <h2>Booking change policy</h2>
+        <p>Plans move. Where we can accommodate it, we will.</p>
+        <ul class="rules">
+          <li><b>One free date change.</b> Ask 14 or more days before arrival and we will move your booking once, to any available dates within the next twelve months, with no change fee. If the new dates cost more, you pay the difference; if they cost less, the balance stays as credit against the stay.</li>
+          <li><b>Changes inside 14 days</b> are treated as a cancellation followed by a new booking, and the cancellation table above applies. Ask anyway — if the nights are easy for us to re-let, we will usually just move you.</li>
+          <li><b>Swapping cottages</b> — Blue for Green or the other way round — is free whenever the other cottage is open for your dates.</li>
+          <li><b>Adding nights</b> is free and always welcome, subject to availability at the rate for those nights.</li>
+          <li><b>Dropping nights</b> 14 or more days out is refunded in full for the nights removed. Inside 14 days, removed nights follow the cancellation table.</li>
+          <li><b>More guests than you booked for</b> needs our agreement before arrival, and may carry an additional-guest charge. Turning up with more people than the cottage sleeps is not something we can fix on the night.</li>
+          <li><b>Changing the lead guest</b> is fine — tell us the new name and ID details before arrival.</li>
+        </ul>
+        <p>Every change has to be confirmed by us in writing before it counts. A change you have asked for but we have not confirmed is not yet a change.</p>
+      </div>
+
+      <!-- ===== REFUNDS ===== -->
+      <div class="doc-block rv" id="refunds">
+        <span class="eyebrow">03</span>
+        <h2>Refund policy</h2>
+        <dl class="kv">
+          <dt>How it comes back</dt><dd>To the card or account you paid from. We cannot refund to a different account, and we do not refund in cash.</dd>
+          <dt>How long</dt><dd>We release approved refunds within <strong>3 working days</strong>. Your bank then takes its own time — usually 5 to 10 working days for a card, 3 to 5 for a bank transfer.</dd>
+          <dt>What is deducted</dt><dd>Payment-gateway and bank charges are not refundable; they were paid to the processor, not to us. Everything else follows the cancellation table.</dd>
+          <dt>Damage deposit</dt><dd>Where one is taken, it is released within <strong>7 days</strong> of check-out, less the documented cost of any damage. We send you the photographs and the bill for anything we deduct.</dd>
+        </dl>
+
+        <h3>Leaving early</h3>
+        <p>Nights you have booked but do not use are not refunded, whatever the reason for leaving — unless the cottage itself became unusable, in which case we refund the unused nights in full.</p>
+
+        <h3>Not arriving</h3>
+        <p>If you have not arrived and not contacted us by noon the day after check-in, we treat the booking as cancelled with no refund, and the cottage goes back on the calendar.</p>
+
+        <h3>If something was wrong</h3>
+        <p>If the cottage is not as described, tell us during your stay and give us the chance to put it right — that is nearly always possible within the hour. If we cannot, we will agree a fair reduction there and then. Complaints raised for the first time after check-out are much harder for either of us to settle honestly.</p>
+      </div>
+
+      <!-- ===== OTHER CHANNELS ===== -->
+      <div class="doc-block rv" id="other">
+        <span class="eyebrow">04</span>
+        <h2>Booked somewhere else?</h2>
+        <p>If you booked through Airbnb, Booking.com or any other platform, <strong>that platform's cancellation and refund terms apply, not these</strong>, and changes and refunds have to go through them. We cannot refund a payment we never received. Booking with us directly is the cheaper and the more flexible of the two.</p>
+        <p>Nothing on this page takes away rights you have under Pakistani consumer law.</p>
+      </div>
+
+      <div class="doc-note rv">
+        <span class="eyebrow">A word about the wording</span>
+        <p>These policies are a draft prepared for the owners of Woodland Cottages. The timings, percentages, peak-date windows, deposit handling and refund turnarounds are proposals, not established terms, and none of it has been reviewed by a lawyer. They should be confirmed against how the property actually operates — and against what Smoobu and the listing platforms are set to enforce — before this page is published.</p>
+      </div>
+
+      <div class="doc-cta">
+        <a href="index.html#book" class="btn btn-lime"><span>Check availability</span></a>
+        <a href="https://wa.me/923469663367" class="btn"><span>Ask us a question</span></a>
+        <a href="docs/Woodland-Cottages-Policies.pdf" class="alink" download>Download as PDF<svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 0v8M4.5 5 8 8.5 11.5 5M0 11h16"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="wrap">
+    <div class="f-top">
+      <a href="index.html#top" class="f-mark" aria-label="Woodland Cottages — home">
+        <img class="f-tree" src="media/logo-icon.png" alt="">
+        <img class="f-word" src="media/logo-word.png" alt="Woodland Cottages">
+      </a>
+      <div class="f-nav">
+        <div class="f-links">
+          <a href="the-walk.html">The Walk</a><a href="index.html#cottages">Cottages</a><a href="index.html#gallery">Gallery</a><a href="index.html#reviews">Reviews</a><a href="index.html#book">Book</a><a href="index.html#enquire">Enquire</a>
+        </div>
+        <div class="f-links f-sub">
+          <a href="house-rules.html">House Rules</a><a href="policies.html">Policies</a><a href="https://wa.me/923469663367">WhatsApp</a>
+        </div>
+      </div>
+    </div>
+    <div class="f-bot">
+      <span>&copy; <span id="yr"></span> Woodland Cottages &middot; Galiyat, Northern Pakistan</span>
+      <span>hello@woodlandcottage.pk &middot; 0346 9663367</span>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/923469663367" class="wa" aria-label="Message us on WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.1c-.24.68-1.42 1.31-1.95 1.36-.5.05-1.13.07-1.83-.11-.42-.11-.96-.29-1.66-.59-2.92-1.26-4.82-4.2-4.97-4.4-.14-.2-1.19-1.58-1.19-3.02s.76-2.14 1.03-2.44c.27-.29.58-.37.78-.37.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.83 2.01.9 2.16.07.14.12.31.02.51-.1.2-.15.32-.29.49-.15.17-.31.38-.44.51-.14.14-.29.3-.13.59.17.29.74 1.23 1.6 1.99 1.1.98 2.02 1.29 2.31 1.43.29.15.46.12.63-.07.17-.2.72-.85.92-1.14.19-.29.39-.24.65-.15.27.1 1.69.8 1.98.94.29.15.48.22.55.34.07.12.07.68-.17 1.36Z"/></svg>
+  WhatsApp us
+</a>
+
+
+<script>
+/* ---------- year ---------- */
+(function(){ var y=document.getElementById('yr'); if(y) y.textContent=new Date().getFullYear(); })();
+
+/* ---------- reveal observer ---------- */
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:.14, rootMargin:'0px 0px -6% 0px'});
+function observeAll(){
+  document.querySelectorAll('.rv:not(.in), .place-fig:not(.in)').forEach(function(el){ io.observe(el); });
+}
+observeAll();
+
+/* ---------- nav: frost the bar once the page has moved ---------- */
+(function(){
+  var bar = document.querySelector('.topnav');
+  if (!bar) return;
+  var on = false;
+  function upd(){
+    var want = window.scrollY > 40;
+    if (want !== on){ on = want; bar.classList.toggle('stuck', on); }
+  }
+  window.addEventListener('scroll', upd, {passive:true});
+  upd();
+})();
+
+/* ---------- mobile drawer ---------- */
+(function(){
+  var btn = document.getElementById('menuBtn'), dr = document.getElementById('drawer');
+  if (!btn || !dr) return;
+  function close(){ document.body.classList.remove('menu-open'); btn.setAttribute('aria-expanded','false'); }
+  btn.addEventListener('click', function(){
+    var open = document.body.classList.toggle('menu-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  dr.addEventListener('click', function(e){ if (e.target.tagName === 'A' || e.target === dr) close(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+})();
+
+/* ---------- table of contents: highlight the section you are reading ---------- */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.doc-toc a'));
+  if (!links.length) return;
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+
+  var spy = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (!e.isIntersecting) return;
+      var i = targets.indexOf(e.target);
+      if (i < 0) return;
+      links.forEach(function(a,j){ a.classList.toggle('here', i === j); });
+    });
+  }, { rootMargin:'-25% 0px -60% 0px', threshold:0 });
+
+  targets.forEach(function(t){ if (t) spy.observe(t); });
+})();
+
+</script>
+
+</body>
+</html>
